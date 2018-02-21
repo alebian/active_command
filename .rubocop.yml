@@ -1,0 +1,6 @@
+AllCops:
+  Exclude:
+    - active_command.gemspec
+
+Documentation:
+  Enabled: false
