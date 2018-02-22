@@ -84,16 +84,23 @@ module ActiveCommand
     end
 
     def initialize_values!(options = {})
+      base_class_parameters.each_key do |name|
+        options[name] ||= nil
+      end
+
       options.each do |key, value|
         @instance_parameters[key] = value
-        check_type!(value, base_class_parameters[key][:type])
+        check_type!(
+          value, base_class_parameters[key][:type], base_class_parameters[key][:required]
+        )
       end
     end
 
-    def check_type!(object, type_definition)
+    def check_type!(object, type_definition, required)
       return if type_definition.nil?
+      return if !required && object.nil?
       type = type_definition.is_a?(Symbol) ? DEFAULT_TYPES[type_definition] : type_definition
-      raise Exceptions::UnexistentDefaultType, type_definition if type.nil?
+      raise Exceptions::UnexistentDefaultType.new(type_definition) if type.nil?
       raise Exceptions::IncompatibleType.new(object, type) unless object.is_a?(type)
     end
 

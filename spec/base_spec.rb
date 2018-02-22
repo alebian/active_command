@@ -14,11 +14,71 @@ describe ActiveCommand::Base do
   end
 
   describe '.required' do
-    let(:example_class) {}
+    let(:example_class) { RequiredTest }
+
+    context 'when not sending the parameter' do
+      it 'does raise' do
+        expect { example_class.call }
+          .to raise_error(ActiveCommand::Exceptions::IncompatibleType)
+      end
+
+      it 'does raise with nil' do
+        expect { example_class.call(parameter: nil) }
+          .to raise_error(ActiveCommand::Exceptions::IncompatibleType)
+      end
+    end
+
+    context 'when sending the parameter' do
+      context 'with correct type' do
+        let(:parameter) { [] }
+
+        it 'does not raise' do
+          expect { example_class.call(parameter: parameter) }.not_to raise_error
+        end
+      end
+
+      context 'with incorrect type' do
+        let(:parameter) { 1 }
+
+        it 'does raise' do
+          expect { example_class.call(parameter: parameter) }
+            .to raise_error(ActiveCommand::Exceptions::IncompatibleType)
+        end
+      end
+    end
   end
 
   describe '.optional' do
-    let(:example_class) {}
+    let(:example_class) { OptionalTest }
+
+    context 'when not sending the parameter' do
+      it 'does not raise' do
+        expect { example_class.call }.not_to raise_error
+      end
+
+      it 'does not raise with nil' do
+        expect { example_class.call(parameter: nil) }.not_to raise_error
+      end
+    end
+
+    context 'when sending the parameter' do
+      context 'with correct type' do
+        let(:parameter) { [] }
+
+        it 'does not raise' do
+          expect { example_class.call(parameter: parameter) }.not_to raise_error
+        end
+      end
+
+      context 'with incorrect type' do
+        let(:parameter) { 1 }
+
+        it 'does raise' do
+          expect { example_class.call(parameter: parameter) }
+            .to raise_error(ActiveCommand::Exceptions::IncompatibleType)
+        end
+      end
+    end
   end
 
   describe '.before' do
