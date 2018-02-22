@@ -16,6 +16,16 @@ describe ActiveCommand::Base do
   describe '.required' do
     let(:example_class) { RequiredTest }
 
+    it 'adds the type definition' do
+      expect(example_class.class_variable_get(:@@parameter_definitions)[:parameter][:type])
+        .to eq(:array)
+    end
+
+    it 'adds the required definition' do
+      expect(example_class.class_variable_get(:@@parameter_definitions)[:parameter][:required])
+        .to be_truthy
+    end
+
     context 'when not sending the parameter' do
       it 'does raise' do
         expect { example_class.call }
@@ -50,6 +60,16 @@ describe ActiveCommand::Base do
 
   describe '.optional' do
     let(:example_class) { OptionalTest }
+
+    it 'adds the type definition' do
+      expect(example_class.class_variable_get(:@@parameter_definitions)[:parameter][:type])
+        .to eq(:array)
+    end
+
+    it 'adds the required definition' do
+      expect(example_class.class_variable_get(:@@parameter_definitions)[:parameter][:required])
+        .to be_falsey
+    end
 
     context 'when not sending the parameter' do
       it 'does not raise' do
