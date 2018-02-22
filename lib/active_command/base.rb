@@ -1,7 +1,7 @@
 module ActiveCommand
   class Base
     def self.inherited(base)
-      base.class_variable_set(:@@parameters, {})
+      base.class_variable_set(:@@parameter_definitions, {})
       base.class_variable_set(:@@before_hooks, [])
       base.class_variable_set(:@@after_hooks, [])
       base.class_eval { extend ClassMethods }
@@ -10,9 +10,7 @@ module ActiveCommand
     module ClassMethods
       def call(options = {})
         instance = new(options)
-        execute_before_hooks
-        instance.call
-        execute_after_hooks
+        instance.run
         instance
       end
 
@@ -21,7 +19,6 @@ module ActiveCommand
           type: options[:type],
           required: true
         }
-        define_method(name) { @parameters[name] }
       end
 
       def optional(name, options = {})
@@ -29,7 +26,6 @@ module ActiveCommand
           type: options[:type],
           required: false
         }
-        define_method(name) { @parameters[name] }
       end
 
       def before(&block)
@@ -41,7 +37,7 @@ module ActiveCommand
       end
 
       def base_class_parameters
-        class_variable_get(:@@parameters)
+        class_variable_get(:@@parameter_definitions)
       end
 
       def base_class_before_hooks
@@ -51,32 +47,45 @@ module ActiveCommand
       def base_class_after_hooks
         class_variable_get(:@@after_hooks)
       end
-
-      def execute_before_hooks
-        base_class_before_hooks.each(&:call)
-      end
-
-      def execute_after_hooks
-        base_class_after_hooks.each(&:call)
-      end
     end
 
     def initialize(options = {})
       # @before_hooks = []
       # @after_hooks = []
-      @parameters = {}
+      @instance_parameters = {}
       initialize_values!(options)
+      define_methods!
+    end
+
+    def run
+      execute_before_hooks
+      call
+      execute_after_hooks
+    end
+
+    def call; end
+
+    def execute_before_hooks
+      self.class.class_variable_get(:@@before_hooks).each do |block|
+        instance_exec(&block)
+      end
+    end
+
+    def execute_after_hooks
+      self.class.class_variable_get(:@@after_hooks).each do |block|
+        instance_exec(&block)
+      end
     end
 
     private
 
     def base_class_parameters
-      self.class.class_variable_get(:@@parameters)
+      self.class.class_variable_get(:@@parameter_definitions)
     end
 
     def initialize_values!(options = {})
       options.each do |key, value|
-        @parameters[key] = value
+        @instance_parameters[key] = value
         check_type!(value, base_class_parameters[key][:type])
       end
     end
@@ -86,6 +95,12 @@ module ActiveCommand
       type = type_definition.is_a?(Symbol) ? DEFAULT_TYPES[type_definition] : type_definition
       raise Exceptions::UnexistentDefaultType, type_definition if type.nil?
       raise Exceptions::IncompatibleType.new(object, type) unless object.is_a?(type)
+    end
+
+    def define_methods!
+      base_class_parameters.each_key do |name|
+        define_singleton_method(name) { @instance_parameters[name] }
+      end
     end
   end
 end

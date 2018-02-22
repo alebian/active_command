@@ -4,6 +4,8 @@ require 'active_command/version'
 module ActiveCommand
   DEFAULT_TYPES = {
     string: String,
-    integer: Integer
+    integer: Integer,
+    array: Array,
+    hash: Hash
   }.freeze
 end
