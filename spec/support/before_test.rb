@@ -2,14 +2,20 @@ class BeforeTest < ActiveCommand::Base
   required :parameter, type: :array
 
   before do
-    parameter << 'before 1'
+    add_value_to_param('before 1')
   end
 
   before do
-    parameter << 'before 2'
+    add_value_to_param('before 2')
   end
 
   def call
-    parameter << 'call'
+    add_value_to_param('call')
+  end
+
+  private
+
+  def add_value_to_param(value)
+    parameter << value
   end
 end

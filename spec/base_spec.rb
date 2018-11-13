@@ -17,12 +17,12 @@ describe ActiveCommand::Base do
     let(:example_class) { RequiredTest }
 
     it 'adds the type definition' do
-      expect(example_class.class_variable_get(:@@parameter_definitions)[:parameter][:type])
+      expect(example_class.send(:parameter_definitions)[:parameter][:type])
         .to eq(:array)
     end
 
     it 'adds the required definition' do
-      expect(example_class.class_variable_get(:@@parameter_definitions)[:parameter][:required])
+      expect(example_class.send(:parameter_definitions)[:parameter][:required])
         .to be_truthy
     end
 
@@ -62,12 +62,12 @@ describe ActiveCommand::Base do
     let(:example_class) { OptionalTest }
 
     it 'adds the type definition' do
-      expect(example_class.class_variable_get(:@@parameter_definitions)[:parameter][:type])
+      expect(example_class.send(:parameter_definitions)[:parameter][:type])
         .to eq(:array)
     end
 
     it 'adds the required definition' do
-      expect(example_class.class_variable_get(:@@parameter_definitions)[:parameter][:required])
+      expect(example_class.send(:parameter_definitions)[:parameter][:required])
         .to be_falsey
     end
 
@@ -107,7 +107,7 @@ describe ActiveCommand::Base do
     let(:hooks_size)    { 2 }
 
     it 'adds the blocks to the execute list' do
-      expect(example_class.class_variable_get(:@@before_hooks).size).to eq(hooks_size)
+      expect(example_class.send(:before_hooks).size).to eq(hooks_size)
     end
 
     context 'when executing blocks' do
@@ -131,7 +131,7 @@ describe ActiveCommand::Base do
     let(:hooks_size)    { 2 }
 
     it 'adds the blocks to the execute list' do
-      expect(example_class.class_variable_get(:@@after_hooks).size).to eq(hooks_size)
+      expect(example_class.send(:after_hooks).size).to eq(hooks_size)
     end
 
     context 'when executing blocks' do

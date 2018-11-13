@@ -15,46 +15,43 @@ module ActiveCommand
       end
 
       def required(name, options = {})
-        base_class_parameters[name] = {
+        parameter_definitions[name] = {
           type: options[:type],
           required: true
         }
       end
 
       def optional(name, options = {})
-        base_class_parameters[name] = {
+        parameter_definitions[name] = {
           type: options[:type],
           required: false
         }
       end
 
       def before(&block)
-        base_class_before_hooks << block
+        before_hooks << block
       end
 
       def after(&block)
-        base_class_after_hooks << block
+        after_hooks << block
       end
 
-      def base_class_parameters
+      def parameter_definitions
         class_variable_get(:@@parameter_definitions)
       end
 
-      def base_class_before_hooks
+      def before_hooks
         class_variable_get(:@@before_hooks)
       end
 
-      def base_class_after_hooks
+      def after_hooks
         class_variable_get(:@@after_hooks)
       end
     end
 
     def initialize(options = {})
-      # @before_hooks = []
-      # @after_hooks = []
-      @instance_parameters = {}
-      initialize_values!(options)
-      define_methods!
+      initialize_values!(options) # TODO: deep_dup parameters
+      define_parameter_getter_methods!
     end
 
     def run
@@ -66,46 +63,55 @@ module ActiveCommand
     def call; end
 
     def execute_before_hooks
-      self.class.class_variable_get(:@@before_hooks).each do |block|
+      before_hooks.each do |block|
         instance_exec(&block)
       end
     end
 
     def execute_after_hooks
-      self.class.class_variable_get(:@@after_hooks).each do |block|
+      after_hooks.each do |block|
         instance_exec(&block)
       end
     end
 
     private
 
-    def base_class_parameters
+    def parameter_definitions
       self.class.class_variable_get(:@@parameter_definitions)
     end
 
+    def before_hooks
+      self.class.class_variable_get(:@@before_hooks)
+    end
+
+    def after_hooks
+      self.class.class_variable_get(:@@after_hooks)
+    end
+
     def initialize_values!(options = {})
-      base_class_parameters.each_key do |name|
-        options[name] ||= nil
+      @instance_parameters = parameter_definitions.each_key.each_with_object({}) do |key, hash|
+        hash[key] = options[key]
       end
 
-      options.each do |key, value|
-        @instance_parameters[key] = value
+      @instance_parameters.each do |key, value|
         check_type!(
-          value, base_class_parameters[key][:type], base_class_parameters[key][:required]
+          object: value,
+          type: parameter_definitions[key][:type],
+          is_required: parameter_definitions[key][:required]
         )
       end
     end
 
-    def check_type!(object, type_definition, required)
-      return if type_definition.nil?
-      return if !required && object.nil?
-      type = type_definition.is_a?(Symbol) ? DEFAULT_TYPES[type_definition] : type_definition
-      raise Exceptions::UnexistentDefaultType.new(type_definition) if type.nil?
+    def check_type!(object:, type:, is_required:)
+      return if type.nil?
+      return if !is_required && object.nil?
+      type = type.is_a?(Symbol) ? DEFAULT_TYPES[type] : type
+      raise Exceptions::UnexistentDefaultType.new(type) if type.nil?
       raise Exceptions::IncompatibleType.new(object, type) unless object.is_a?(type)
     end
 
-    def define_methods!
-      base_class_parameters.each_key do |name|
+    def define_parameter_getter_methods!
+      parameter_definitions.each_key do |name|
         define_singleton_method(name) { @instance_parameters[name] }
       end
     end
