@@ -1,5 +1,11 @@
+require 'dry-types'
+
 module ActiveCommand
   class Base
+    module Types
+      include Dry::Types.module
+    end
+
     def self.inherited(base)
       base.class_variable_set(:@@parameter_definitions, {})
       base.class_variable_set(:@@before_hooks, [])
@@ -94,21 +100,25 @@ module ActiveCommand
       end
 
       @instance_parameters.each do |key, value|
+        definition = parameter_definitions[key]
         check_type!(
-          object: value,
-          type: parameter_definitions[key][:type],
-          is_required: parameter_definitions[key][:required]
+          key: key, object: value, type: definition[:type], is_required: definition[:required]
         )
       end
     end
 
-    def check_type!(object:, type:, is_required:)
-      return if type.nil?
-      return if !is_required && object.nil?
-      type = type.is_a?(Symbol) ? DEFAULT_TYPES[type] : type
-      raise Exceptions::UnexistentDefaultType.new(type) if type.nil?
-      raise Exceptions::IncompatibleType.new(object, type) unless object.is_a?(type)
+    # rubocop:disable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
+    def check_type!(key:, object:, type:, is_required:)
+      raise Exceptions::MissingRequiredParameter, key if is_required && object.nil?
+      return if type.nil? || object.nil?
+
+      if type.respond_to?(:try)
+        raise Exceptions::IncompatibleType.new(object, type.name) if type.try(object).failure?
+      else
+        raise Exceptions::IncompatibleType.new(object, type) unless object.is_a?(type)
+      end
     end
+    # rubocop:enable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
 
     def define_parameter_getter_methods!
       parameter_definitions.each_key do |name|

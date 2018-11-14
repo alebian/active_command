@@ -1,3 +1,3 @@
 class RequiredTest < ActiveCommand::Base
-  required :parameter, type: :array
+  required :parameter, type: Types::Array
 end

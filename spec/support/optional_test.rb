@@ -1,3 +1,3 @@
 class OptionalTest < ActiveCommand::Base
-  optional :parameter, type: :array
+  optional :parameter, type: Types::Array
 end

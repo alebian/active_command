@@ -1,9 +1,9 @@
 module ActiveCommand
   module Exceptions
-    class UnexistentDefaultType < StandardError
-      def initialize(type)
-        @type = type
-        super("Unexistent default type: `#{type}`")
+    class MissingRequiredParameter < StandardError
+      def initialize(name)
+        @name = name
+        super("Required parameter '#{@name}' is missing.")
       end
     end
 

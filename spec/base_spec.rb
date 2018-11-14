@@ -17,24 +17,22 @@ describe ActiveCommand::Base do
     let(:example_class) { RequiredTest }
 
     it 'adds the type definition' do
-      expect(example_class.send(:parameter_definitions)[:parameter][:type])
-        .to eq(:array)
+      expect(example_class.send(:parameter_definitions)[:parameter][:type].name).to eq('Array')
     end
 
     it 'adds the required definition' do
-      expect(example_class.send(:parameter_definitions)[:parameter][:required])
-        .to be_truthy
+      expect(example_class.send(:parameter_definitions)[:parameter][:required]).to be_truthy
     end
 
     context 'when not sending the parameter' do
       it 'does raise' do
         expect { example_class.call }
-          .to raise_error(ActiveCommand::Exceptions::IncompatibleType)
+          .to raise_error(ActiveCommand::Exceptions::MissingRequiredParameter)
       end
 
       it 'does raise with nil' do
         expect { example_class.call(parameter: nil) }
-          .to raise_error(ActiveCommand::Exceptions::IncompatibleType)
+          .to raise_error(ActiveCommand::Exceptions::MissingRequiredParameter)
       end
     end
 
@@ -62,13 +60,11 @@ describe ActiveCommand::Base do
     let(:example_class) { OptionalTest }
 
     it 'adds the type definition' do
-      expect(example_class.send(:parameter_definitions)[:parameter][:type])
-        .to eq(:array)
+      expect(example_class.send(:parameter_definitions)[:parameter][:type].name).to eq('Array')
     end
 
     it 'adds the required definition' do
-      expect(example_class.send(:parameter_definitions)[:parameter][:required])
-        .to be_falsey
+      expect(example_class.send(:parameter_definitions)[:parameter][:required]).to be_falsey
     end
 
     context 'when not sending the parameter' do

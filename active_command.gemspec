@@ -27,4 +27,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rspec', '~> 3.7'
   spec.add_development_dependency 'rubocop', '~> 0.52'
   spec.add_development_dependency 'byebug', '~> 10.0'
+
+  spec.add_dependency 'dry-types', '~> 0.13'
 end

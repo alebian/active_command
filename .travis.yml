@@ -15,7 +15,7 @@ install:
 
 script:
   - bundle exec rspec
-  - bundle exec rubocop -R --format simple lib spec
+  - bundle exec rubocop -D --format simple lib spec
 
 os:
   - linux

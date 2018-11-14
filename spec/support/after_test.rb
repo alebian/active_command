@@ -1,5 +1,5 @@
 class AfterTest < ActiveCommand::Base
-  required :parameter, type: :array
+  required :parameter, type: Array
 
   def call
     parameter << 'call'

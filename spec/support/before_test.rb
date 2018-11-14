@@ -1,5 +1,5 @@
 class BeforeTest < ActiveCommand::Base
-  required :parameter, type: :array
+  required :parameter, type: Types::Array
 
   before do
     add_value_to_param('before 1')

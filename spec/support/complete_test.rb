@@ -1,6 +1,6 @@
 class CompleteTest < ActiveCommand::Base
-  required :required_parameter, type: :array
-  optional :optional_parameter, type: :integer
+  required :required_parameter, type: Types::Array
+  optional :optional_parameter, type: Types::Integer
 
   before do
     parameter << 1
