@@ -2,11 +2,10 @@ sudo: false
 
 language: ruby
 rvm:
-  - 2.0.0
-  - 2.1
-  - 2.2
   - 2.2.4
   - 2.3.0
+  - 2.4.0
+  - 2.5.1
 
 before_install: gem install bundler -v 1.16.1
 
@@ -16,6 +15,7 @@ install:
 script:
   - bundle exec rspec
   - bundle exec rubocop -R --format simple lib spec
+  - CODECLIMATE_REPO_TOKEN=7efd4e5bcd2a68981cd6209d2f05f8008821ea32c6918f697c044d7220a94cd6 bundle exec codeclimate-test-reporter
 
 os:
   - linux
